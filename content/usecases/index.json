@@ -22,12 +22,12 @@
     { "id": "technology",        "label": "Technology",                "count": 1,  "icon": "cpu" }
   ],
   "patterns": [
-    { "id": "document-rag",                  "label": "Document RAG",                    "count": 23 },
-    { "id": "trigger-extract-validate-route","label": "Trigger → Extract → Route",       "count": 19 },
-    { "id": "research-synthesize-generate",  "label": "Research → Synthesize → Generate","count": 15 },
-    { "id": "hitl-approval-gate",            "label": "HITL Approval Gate",              "count": 13 },
-    { "id": "parallel-subagents",            "label": "Parallel Subagents",              "count": 8  },
-    { "id": "document-eval-structured-output","label": "Document Eval + Structured Output","count": 14 }
+    { "id": "document-rag",                  "label": "Document RAG",                    "count": 10 },
+    { "id": "trigger-extract-validate-route","label": "Trigger → Extract → Route",       "count": 8  },
+    { "id": "research-synthesize-generate",  "label": "Research → Synthesize → Generate","count": 7  },
+    { "id": "hitl-approval-gate",            "label": "HITL Approval Gate",              "count": 9  },
+    { "id": "parallel-subagents",            "label": "Parallel Subagents",              "count": 5  },
+    { "id": "document-eval-structured-output","label": "Document Eval + Structured Output","count": 5  }
   ],
   "featuredIds": [
     "invoice-ops-hitl",
