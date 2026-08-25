@@ -1,0 +1,193 @@
+{
+  "id": "incident-postmortem-synthesis",
+  "title": "Incident Postmortem Synthesis Agent",
+  "vertical": "technology",
+  "patterns": [
+    "parallel-subagents",
+    "research-synthesize-generate",
+    "document-eval-structured-output",
+    "hitl-approval-gate"
+  ],
+  "problem": "After a SEV1/SEV2 incident, the incident commander or on-call lead typically spends 4–6 hours manually cross-referencing three disconnected sources — the observability dashboards (alert timeline, error rate and latency graphs, log queries), the incident Slack/Teams channel scrollback (which can run to hundreds or thousands of messages across a multi-day incident), and the PRs/commits/deploys that caused and fixed the issue — before a single word of the postmortem gets drafted. Engineering orgs commonly report completing well under half of postmortems within their own target SLA (often 5–7 business days), and lower-severity incidents frequently skip the postmortem entirely because the reconstruction effort doesn't feel worth it — which means the same root cause quietly recurs because no one wrote it down.",
+  "solution": "A parallel-subagent pipeline pulls evidence from the observability platform, the incident chat transcript, and the source-control/deploy history for the incident window, then correlates all three into a single timestamp-normalised chronological timeline spanning detection through resolution. A synthesis agent drafts a structured postmortem — summary, impact/severity, root cause analysis, timeline, contributing factors, what went well/didn't, and proposed corrective actions with suggested owners — and explicitly flags any point where the chat narrative disagrees with what the logs or deploy history show, rather than picking one account. Nothing is finalized: the incident commander reviews, corrects, resolves flagged discrepancies, and must approve before the postmortem publishes or any action-item ticket is created.",
+  "whoItsFor": "Incident Commanders, On-Call/SRE Engineers, Engineering Managers, Platform Reliability Teams",
+  "workflowSteps": [
+    "Trigger: incident marked resolved in the incident management tool (PagerDuty / Opsgenie), or the incident commander manually kicks off postmortem drafting from the closed incident record",
+    "ObservabilityAgent queries the observability platform for the incident time window — alert firing/resolution timestamps, error rate and latency graphs, and the relevant log queries (Datadog, Grafana/Loki, or Splunk depending on the service)",
+    "ChatTranscriptAgent retrieves the incident Slack/Teams channel for that window and extracts speaker-attributed messages, classifying each as a decision, an action taken, an observation, or noise/cross-talk — only the first three categories feed downstream synthesis",
+    "CodeChangeAgent retrieves PRs, commits, and deploy events in the pre-incident deploy window and any hotfix/rollback PRs merged during mitigation, via the GitHub/GitLab API — diffs, deploy timestamps, and code owners from CODEOWNERS",
+    "TimelineCorrelationAgent normalises all three streams to a common UTC timestamp basis and merges them into one chronological timeline (detection, escalation, mitigation, resolution), cross-referencing each chat-claimed event against the corresponding log or deploy evidence",
+    "Discrepancy check: any timeline point where the chat account conflicts with observability or deploy evidence (e.g., 'we rolled back at 14:32' in Slack vs. a deploy log showing rollback completed at 14:41) is flagged as an open discrepancy with both source citations — never silently resolved in one direction",
+    "PostmortemDraftAgent optionally retrieves similar historical incidents and relevant runbooks via RAG over the postmortem archive, to surface recurring failure patterns worth naming in contributing factors",
+    "PostmortemDraftAgent generates the structured draft — summary, customer/SLA impact and severity, root cause analysis (ranked contributing factors, not a forced single cause), timeline, what went well/didn't, and proposed corrective actions with suggested (not assigned) owners drawn from code ownership and on-call roster",
+    "HITL review gate: the incident commander reviews the draft in a UI showing every timeline entry's source citations and all flagged discrepancies, edits the narrative, explicitly resolves each discrepancy with their own judgment, and confirms or reassigns real owners on action items — the agent never finalizes root cause, assigns blame, or resolves a flagged conflict on its own",
+    "On explicit IC approval only, the agent publishes the final postmortem to the postmortem repository and creates the corresponding tracked action-item tickets — the agent never auto-publishes or auto-files tickets without this sign-off",
+    "Audit trail retained: full evidence snapshot per timeline entry, source citations, discrepancy resolutions, and a diff between the AI draft and the published version, for retrospective process review"
+  ],
+  "keyInsights": "The value isn't reconstruction speed — it's that the agent is structurally forbidden from quietly picking a winner when sources disagree; a postmortem that smooths over a chat-vs-logs conflict to read cleanly is worse than a slow one, because it can bury the actual root cause under a more convenient narrative. The other easy-to-miss architectural requirement is clock normalisation: Slack timestamps, deploy timestamps, and alert-firing timestamps come from three systems with different clocks and time zone handling, and correlating them without first converting everything to a common UTC epoch produces a timeline that looks precise and is quietly wrong.",
+  "relatedExams": [
+    {
+      "exam": "ccdf",
+      "domain": 3,
+      "why": "Agents and Workflows — parallel subagent fan-out across observability, chat, and code sources with a correlation/merge step"
+    },
+    {
+      "exam": "ccdf",
+      "domain": 8,
+      "why": "Eval, Testing, and Debugging — structured postmortem output evaluated against a fixed rubric with explicit discrepancy flagging rather than silent resolution"
+    },
+    {
+      "exam": "ccap",
+      "domain": 4,
+      "why": "Governance, Safety & Risk — hard HITL gate before publication and before any corrective-action ticket is created"
+    }
+  ],
+  "relatedInterviewQs": [
+    "q-orch-001",
+    "q-hitl-001"
+  ],
+  "examScenarioPotential": "high",
+  "blogPotential": "high",
+  "mermaidDiagram": "flowchart TD\n  A([Incident Marked Resolved\\nPagerDuty / Opsgenie]) --> B[Coordinator\\nKick Off Postmortem Draft]\n  B --> C1[ObservabilityAgent\\nDatadog / Grafana / Splunk Alert + Metric Timeline]\n  B --> C2[ChatTranscriptAgent\\nSlack / Teams Incident Channel]\n  B --> C3[CodeChangeAgent\\nGitHub / GitLab PRs + Commits + Deploys]\n  C1 & C2 & C3 --> D[TimelineCorrelationAgent\\nNormalise to UTC + Merge Chronological Timeline]\n  D --> E{Conflicting Accounts\\nAcross Sources?}\n  E -->|Yes| F[Flag Discrepancy\\nw/ Both Citations for IC]\n  E -->|No| G[Confirmed Timeline Entry]\n  F --> H[PostmortemDraftAgent\\nSummary + Impact + RCA + Timeline + Action Items]\n  G --> H\n  H --> I[Incident Commander Review UI\\nEvidence Citations + Flagged Discrepancies]\n  I --> J{IC Approves?}\n  J -->|Edits Needed| I\n  J -->|Approved| K([Publish to Postmortem Repo\\n+ Create Tracked Action Items])\n  J -->|Hold| L([Return for Rework])",
+  "architectureNotes": "The three evidence agents are strictly read-only and run in parallel, but discrepancy detection is deliberately a deterministic comparison over normalised, timestamped claims rather than an LLM judgment call — an LLM asked to 'reconcile' two conflicting accounts will happily produce a fluent, confident merge that erases the actual disagreement, which is the exact failure this workflow exists to prevent. Publication and action-item ticket creation are collapsed into a single atomic step gated on one explicit IC approval state, rather than two independently reachable write paths — a design that would let a partially-approved draft still auto-file tickets is a governance gap, not a convenience. RAG over the historical postmortem archive is scoped narrowly to surfacing candidate recurring patterns for the contributing-factors section; it is explicitly not permitted to auto-populate the root cause field, since a plausible-sounding match to a past incident is not evidence about this one.",
+  "relatedUseCases": [
+    {
+      "id": "insurance-claims-triage",
+      "label": "FNOL Claims Intake Triage & Adjudication Support Agent",
+      "vertical": "Insurance"
+    },
+    {
+      "id": "contract-redline-playbook-agent",
+      "label": "Contract Redline & Playbook Compliance Agent",
+      "vertical": "Legal Teams"
+    },
+    {
+      "id": "meeting-prep-agent",
+      "label": "Meeting Prep Agent (GTM)",
+      "vertical": "Go-To-Market"
+    }
+  ],
+  "techStack": [
+    {
+      "category": "LLM",
+      "tools": [
+        "GPT-4o (structured extraction from chat transcripts and timeline drafting)",
+        "claude-3-5-sonnet (root cause synthesis and discrepancy narrative)"
+      ]
+    },
+    {
+      "category": "Observability / Monitoring",
+      "tools": [
+        "Datadog API (metrics, alert timeline)",
+        "Grafana / Loki (log queries)",
+        "Splunk (enterprise log fallback)",
+        "PagerDuty / Opsgenie (incident metadata, escalation timeline, trigger)"
+      ]
+    },
+    {
+      "category": "Chat / Collaboration",
+      "tools": [
+        "Slack API (incident channel export, speaker-attributed retrieval)",
+        "Microsoft Teams Graph API (Teams incident channel fallback)"
+      ]
+    },
+    {
+      "category": "Source Control / Deploy",
+      "tools": [
+        "GitHub API / GitLab API (PRs, commits, diffs, CODEOWNERS)",
+        "Argo CD / deploy pipeline logs (deploy and rollback timestamps)"
+      ]
+    },
+    {
+      "category": "Historical Postmortem RAG",
+      "tools": [
+        "Azure AI Search (hybrid vector + keyword over the indexed postmortem archive and runbooks)"
+      ]
+    },
+    {
+      "category": "Workflow Orchestration",
+      "tools": [
+        "Azure AI Foundry agent framework (parallel subagent orchestration across observability, chat, and code sources)",
+        "Temporal (durable workflow across evidence-gather and HITL gates)"
+      ]
+    },
+    {
+      "category": "Postmortem Repository / Ticketing",
+      "tools": [
+        "Confluence / Notion (published postmortem storage)",
+        "Jira (tracked corrective action items, created only post-approval)"
+      ]
+    }
+  ],
+  "failureModes": [
+    {
+      "mode": "Clock skew and time zone misalignment across Slack, deploy pipeline, and alerting timestamps produces a timeline that looks precise but is subtly wrong",
+      "mitigation": "All timestamps are normalised to a common UTC epoch at ingestion before correlation; the TimelineCorrelationAgent requires at least two independent sources to agree within a tolerance window before an event is marked confirmed rather than flagged."
+    },
+    {
+      "mode": "Incident channel scrollback is dominated by speculation, jokes, and unrelated cross-talk, polluting the extracted timeline with noise",
+      "mitigation": "ChatTranscriptAgent classifies every message as decision / action / observation / noise before use; only the first three categories feed the timeline, with the full raw transcript retained as linked evidence for the IC to consult if needed."
+    },
+    {
+      "mode": "Root cause misattribution — the model confidently names one root cause for an incident that actually had multiple contributing factors (a bad deploy plus a pre-existing capacity gap, for example)",
+      "mitigation": "RCA is drafted as ranked contributing factors with evidence links rather than a single forced cause; the IC must explicitly confirm or edit the designated primary cause before approval, and the draft UI never presents a single cause as pre-selected."
+    },
+    {
+      "mode": "Conflicting accounts between chat and logs/deploys get silently smoothed into one clean narrative instead of surfaced",
+      "mitigation": "Discrepancy detection is a deterministic pairwise comparison, not an LLM merge; any flagged conflict blocks final approval until the IC records an explicit resolution note, and both source citations remain attached to the published entry regardless of which account the IC confirms."
+    },
+    {
+      "mode": "Corrective-action tickets get auto-filed or the postmortem auto-publishes without a genuine review, reintroducing the accountability gap the workflow was built to close",
+      "mitigation": "Publication and ticket creation are gated behind a single explicit IC-approval state written by the review UI, not two independently reachable write paths; suggested owners on action items are tagged 'suggested' and require IC confirmation before a ticket is ever created."
+    }
+  ],
+  "scalingConsiderations": [
+    "Mid-size engineering orgs commonly run 50–150 SEV1–SEV3 incidents per quarter; a priority queue drafts SEV1/SEV2 postmortems first, with lower-severity incidents batched to avoid starving the pipeline during incident-heavy weeks.",
+    "Draft generation compresses manual postmortem authoring from 4–6 hours to typically under 45 minutes of incident-commander review time for a standard SEV2.",
+    "Multi-day incidents can generate thousands of Slack messages in the incident channel; ChatTranscriptAgent must chunk and summarise per time window before final synthesis rather than attempting a single-pass ingestion, or the classification step degrades under context length.",
+    "Observability API rate limits (Datadog/Grafana query quotas) mean incident-window query results should be cached, since the same evidence is re-fetched across draft/redraft cycles as the IC edits.",
+    "The historical postmortem RAG index grows monotonically; reindex incrementally on each new publish rather than a full reindex, to keep RCA-context retrieval current without unnecessary reprocessing."
+  ],
+  "integrations": [
+    {
+      "system": "Incident Management (PagerDuty / Opsgenie)",
+      "type": "Trigger",
+      "note": "Incident-resolved event kicks off postmortem draft generation"
+    },
+    {
+      "system": "Observability Platform (Datadog / Grafana / Loki / Splunk)",
+      "type": "Read",
+      "note": "Alert timeline, metrics, and log queries for the incident window"
+    },
+    {
+      "system": "Chat Platform (Slack / Microsoft Teams)",
+      "type": "Read",
+      "note": "Incident channel transcript for speaker-attributed extraction"
+    },
+    {
+      "system": "Source Control (GitHub / GitLab)",
+      "type": "Read",
+      "note": "PRs, commits, diffs, and CODEOWNERS for the deploy window"
+    },
+    {
+      "system": "Postmortem Archive",
+      "type": "Read",
+      "note": "Historical postmortems and runbooks retrieved via RAG for RCA context"
+    },
+    {
+      "system": "Incident Commander Review UI",
+      "type": "HITL",
+      "note": "Draft review, evidence-cited discrepancy resolution, and action-item owner confirmation"
+    },
+    {
+      "system": "Postmortem Repository (Confluence / Notion)",
+      "type": "Write",
+      "note": "Final postmortem published only after explicit incident-commander approval"
+    },
+    {
+      "system": "Ticketing (Jira)",
+      "type": "Write",
+      "note": "Corrective action items created only after approval — never agent-initiated"
+    }
+  ]
+}
