@@ -7,20 +7,22 @@ This repository is the canonical content source for Aarya's enterprise AI use-ca
 - `content/usecases/index.json` — catalog index: verticals (industries), architectural patterns, and `featuredIds` — powers the `/usecases` platform page
 - `content/usecases/_source-intel.json` — the source-of-truth intel file: full detail (tech stack, failure modes, integrations, Mermaid diagrams) for every featured use case
 - `content/usecases/cases/*.json` — one file per published use case, each extending its `_source-intel.json` entry with `relatedUseCases` cross-links; this is what `/usecases/{id}` renders
-- `scripts/validate-content.mjs` — schema validator (canonical copy, synced from `ajch_platform`) — generic JSON-validity check; no usecases-specific schema branch exists yet
+- `scripts/validate-content.mjs` — schema validator (canonical copy, synced from `ajch_platform`) — includes a `validateUsecase()` branch checking the full case-JSON schema (id, title, vertical, patterns, failureModes, etc.), not just generic JSON validity
 - `scripts/add-uc-diagrams.py`, `scripts/expand-uc-content.py`, `scripts/gen-uc-case-files.py` — one-off authoring tools used to seed/expand this content, ported here from `ajch_platform` since they only ever operated on this vertical's own files
 - `.github/workflows/validate-content.yml` — automated schema validation on PR/push
 
 ## Publishing model
 
-There is no dedicated content-authoring agent for this vertical yet — unlike Blog (Content Lead → Tech Writer → Release Engineer) or SkillUp (Curriculum Engineer → Assessment/Docs/Scenario Engineer), use cases are currently authored by hand or via the one-off scripts above. `ajch_platform`'s refactor plan (`platform_refactor.md`, Track B step 15) flags adapting the `content-lead` pattern into a lightweight use-case-writer agent as future work — not required for this repo to function as a vertical.
+This vertical has a dedicated content-authoring pipeline, matching the pattern used by Blog (Content Lead → Tech Writer → Release Engineer): **Usecase Lead → Usecase Writer → AppSec Engineer (Security Gate) → Usecase Publisher**, defined in `.claude/agents/`. The shared pipeline contract lives in `.claude/skills/vertical-pipeline/SKILL.md`.
 
-Until that exists:
+**Content files are never written directly** — any addition or edit to `content/usecases/` should go through Usecase Lead as the entry point; see `CLAUDE.md` at this repo's root. The one-off scripts under `scripts/` remain available for bulk/offline authoring, but routine case authoring should use the agent pipeline.
 
-1. Add or edit a case under `content/usecases/cases/`, and update `content/usecases/index.json`'s `verticals[].count` / `patterns[].count` / `featuredIds` and `content/usecases/_source-intel.json` as needed.
-2. Validate locally (below).
+1. Ask Usecase Lead to draft one or more cases (it delegates research → Usecase Writer, validation → AppSec Engineer, and the actual file write + `index.json`/`_source-intel.json` update → Usecase Publisher).
+2. Validate locally (below) — the agent pipeline runs this automatically as part of the Security Gate, but it's also safe to re-run by hand.
 3. Open a PR, get it reviewed, merge to `main`.
 4. From `ajch_platform`, promote the new SHA into `content-manifest.json` (via its `promote-content.yml` workflow dispatch, or `node scripts/sync-vertical-repo.mjs usecases ajeetchouksey/ajch_ai_usecases <sha>`).
+
+Agent definitions in `.claude/agents/` and the pipeline skill in `.claude/skills/` are kept in sync with `ajch_platform`'s canonical copies via `node scripts/sync-vertical-agents.mjs usecases <path>`, run from `ajch_platform` — not edited by hand in this repo.
 
 ## Validation
 
@@ -35,7 +37,7 @@ node scripts/validate-content.mjs \
   content/usecases/cases/*.json
 ```
 
-This checks JSON validity. (Use-case files don't yet have a dedicated schema branch in the validator the way MCQ questions or blog posts do — file-reference/shape checks can be added here if this vertical grows a stricter schema later.)
+This checks JSON validity plus the case schema (required fields, kebab-case `id`, minimum `failureModes` count) via `validateUsecase()`.
 
 ## File ownership and scope
 

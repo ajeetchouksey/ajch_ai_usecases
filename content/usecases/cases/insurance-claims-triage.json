@@ -1,0 +1,189 @@
+{
+  "id": "insurance-claims-triage",
+  "title": "FNOL Claims Intake Triage & Adjudication Support Agent",
+  "vertical": "insurance",
+  "patterns": [
+    "trigger-extract-validate-route",
+    "document-eval-structured-output",
+    "document-rag",
+    "hitl-approval-gate"
+  ],
+  "problem": "First notice of loss (FNOL) arrives as call transcripts, web-form submissions, and scanned PDF packets (police reports, repair estimates, medical bills) with no common structure. Manual intake and adjuster routing takes 25–40 minutes per claim, and mid-size carriers report 15–20% SLA breach rates on initial contact windows during normal volume — far worse during CAT events. Missed fraud signals and misrouted claims contribute to claim leakage industry-wide estimated at 5–10% of incurred losses.",
+  "solution": "A trigger-extract-validate-route agent normalises FNOL from any intake channel into a structured, confidence-scored claim record, validates it against policy coverage terms via RAG over the policy document store, runs parallel fraud-signal checks against claims databases and prior history, and routes the claim to the correct adjuster queue by complexity and risk. Every payout authorization stops at a mandatory human approval gate — the agent surfaces evidence and a recommendation, never authorizes payment itself.",
+  "whoItsFor": "Claims Adjusters, Claims Intake Coordinators, SIU (Special Investigations Unit) Analysts, Claims Operations Managers",
+  "workflowSteps": [
+    "Trigger: FNOL received via call-center recording, web portal submission, or scanned/emailed PDF packet",
+    "IntakeAgent normalises the source — transcript segmentation for phone claims (speaker-diarised), structured field parse for web forms, OCR + layout extraction for scanned PDFs (police reports, repair estimates, medical bills)",
+    "ExtractionAgent produces a structured claim record — policy number, loss date, peril type, location, parties, described damages, requested amount — with a per-field confidence score",
+    "PolicyValidationAgent retrieves the policy record from the policy admin system and checks coverage via RAG over indexed policy documents: policy active on loss date, peril covered, applicable limits/deductible, endorsement exclusions",
+    "FraudSignalAgent runs in parallel: claim-timing vs. policy inception check, cross-source narrative consistency check (call transcript vs. web form vs. police report), prior claim history lookup (ISO ClaimSearch), staged-loss pattern check (LexisNexis C.L.U.E.)",
+    "Orchestrator merges validation and fraud results into a triage packet with a complexity/risk score",
+    "Routing gate: low-complexity, no-flag claims route to the fast-track adjuster queue; high-value, multi-peril, or fraud-flagged claims route to a senior adjuster or SIU queue",
+    "Adjuster reviews the pre-loaded triage packet (extracted data, coverage validation, evidence-linked fraud flags), requests additional documentation if needed",
+    "HITL approval gate: any reserve or payout authorization requires explicit adjuster/supervisor sign-off — the agent never authorizes payment; on approval, writes the payment instruction to the claims/disbursement system",
+    "Audit log entry recorded for every decision with a full evidence snapshot"
+  ],
+  "keyInsights": "The leverage is in normalising three structurally incompatible intake formats — call transcript, web form, scanned PDF — into one confidence-scored record before any coverage or fraud logic runs; validation built on ambiguous extraction just produces confident-sounding wrong answers. Fraud checks must stay evidence-linked signals for a human to weigh rather than silent auto-declines, because an over-aggressive false-positive rate quietly defeats the entire triage system by routing everything back to manual review.",
+  "relatedExams": [
+    {
+      "exam": "ccdf",
+      "domain": 3,
+      "why": "Agents and Workflows — trigger-extract-validate-route with parallel fraud and coverage checks"
+    },
+    {
+      "exam": "ccap",
+      "domain": 4,
+      "why": "Governance, Safety & Risk — mandatory HITL gate before any payout authorization"
+    },
+    {
+      "exam": "ccarf",
+      "domain": 3,
+      "why": "Governance, Risk, and Responsible Use — regulated claims-handling compliance"
+    }
+  ],
+  "relatedInterviewQs": [
+    "q-orch-001",
+    "q-hitl-001",
+    "q-rag-001"
+  ],
+  "examScenarioPotential": "high",
+  "blogPotential": "high",
+  "mermaidDiagram": "flowchart TD\n  A1([Call Transcript]) --> B[IntakeAgent\\nNormalise Source]\n  A2([Web Form]) --> B\n  A3([Scanned PDF\\nPolice Report / Estimate / Bill]) --> B\n  B --> C[ExtractionAgent\\nStructured Claim Record + Confidence]\n  C --> D1[PolicyValidationAgent\\nRAG over Policy Docs]\n  C --> D2[FraudSignalAgent\\nISO ClaimSearch + LexisNexis]\n  D1 & D2 --> E[Orchestrator\\nMerge + Risk Score]\n  E --> F{Complexity /\\nFraud Flag?}\n  F -->|Low risk| G[Fast-Track Adjuster Queue]\n  F -->|High value / flagged| H[Senior Adjuster / SIU Queue]\n  G --> I[Adjuster Review]\n  H --> I\n  I --> J{Payout\\nAuthorization?}\n  J -->|Human Approves| K([Write Payment Instruction\\n→ Disbursement System])\n  J -->|More info needed| L([Request Additional Docs])\n  J -->|Denied| M([Issue Denial Letter\\n+ Reason Code])",
+  "architectureNotes": "Extraction runs per-channel with channel-specific confidence models — ASR word-error-rate for calls, OCR confidence for scans — so downstream validation can apply different thresholds per source type instead of treating all extracted fields as equally reliable. PolicyValidationAgent and FraudSignalAgent run in parallel and are deterministic-overlay checks (coverage rules, database lookups) rather than LLM judgment calls, keeping the auditable decision trail out of free-text generation. The routing gate is a soft triage step (queue assignment), but payout authorization is a hard, code-enforced HITL gate — the two must never be conflated, since misrouting a claim is recoverable but an unauthorized payout is not.",
+  "relatedUseCases": [
+    {
+      "id": "policy-qa-rag",
+      "label": "Insurance Policy Q&A Agent",
+      "vertical": "Insurance"
+    },
+    {
+      "id": "loan-application-underwriting",
+      "label": "Loan Application Underwriting Agent",
+      "vertical": "Banking"
+    },
+    {
+      "id": "aml-parallel-hitl",
+      "label": "Anti-Money Laundering Agent",
+      "vertical": "Banking"
+    }
+  ],
+  "techStack": [
+    {
+      "category": "LLM",
+      "tools": [
+        "GPT-4o (structured extraction from transcripts and web-form data)",
+        "claude-3-5-sonnet (fraud-signal reasoning and triage packet synthesis)"
+      ]
+    },
+    {
+      "category": "Speech-to-Text",
+      "tools": [
+        "Azure AI Speech (call-center transcription with speaker diarisation)",
+        "Deepgram (fallback for legacy call recording formats)"
+      ]
+    },
+    {
+      "category": "Document AI",
+      "tools": [
+        "Azure AI Document Intelligence (police reports, repair estimates, medical bills — prebuilt + custom models)",
+        "AWS Textract (secondary OCR for low-quality scans)"
+      ]
+    },
+    {
+      "category": "Policy RAG",
+      "tools": [
+        "Azure AI Search (hybrid vector + keyword over indexed policy documents)",
+        "product-line namespace isolation (auto, home, commercial)"
+      ]
+    },
+    {
+      "category": "Fraud / Claims Databases",
+      "tools": [
+        "ISO ClaimSearch (prior claim history, cross-carrier lookup)",
+        "LexisNexis C.L.U.E. (staged-loss and pattern indicators)"
+      ]
+    },
+    {
+      "category": "Workflow Orchestration",
+      "tools": [
+        "Azure AI Foundry agent framework",
+        "Temporal (durable workflow across intake, validation, and HITL gates)"
+      ]
+    },
+    {
+      "category": "Claims / Policy Admin",
+      "tools": [
+        "Guidewire ClaimCenter",
+        "Duck Creek Claims",
+        "Majesco Policy Administration"
+      ]
+    }
+  ],
+  "failureModes": [
+    {
+      "mode": "Fraud false-positive rate routes most claims to manual review, defeating the purpose of triage",
+      "mitigation": "Use tiered flags instead of a single binary: a soft flag stays in the fast-track queue with an annotation for the adjuster to weigh, a hard flag (multiple corroborating signals) routes to SIU. Calibrate thresholds monthly against analyst-verdict feedback and track precision/recall as a platform SLO."
+    },
+    {
+      "mode": "OCR failure or low-confidence extraction on poor-quality scanned police reports",
+      "mitigation": "Per-field confidence threshold; fields below threshold are flagged on the triage packet and routed to a manual data-entry queue. Never auto-populate a coverage decision on an unverified loss detail — store raw scan alongside structured output for audit."
+    },
+    {
+      "mode": "Policy administration system unavailable during coverage validation",
+      "mitigation": "Circuit breaker with fallback to a cached policy snapshot (TTL 1h) tagged with a staleness flag; claim is held in a 'pending coverage verification' state rather than blocked from intake entirely."
+    },
+    {
+      "mode": "Adjuster queue misrouting on ambiguous or multi-peril claims (e.g., storm-driven water damage spanning property and catastrophe queues)",
+      "mitigation": "Complexity classifier returns a multi-label output rather than a single forced category; ambiguous claims default to a senior generalist queue instead of silently picking one queue, with the ambiguity itself surfaced to the adjuster."
+    }
+  ],
+  "scalingConsiderations": [
+    "FNOL volume spikes 10–50x during catastrophe (CAT) events — queue-based ingestion with autoscaling extraction workers is required, not optional, for hurricane/hail/wildfire response.",
+    "Structured extraction compresses per-claim intake from 25–40 minutes (manual) to under 4 minutes regardless of source channel mix.",
+    "Fast-track auto-routing rate should target 50–65% of standard first-party claims; monitor monthly — a sudden spike may indicate fraud-threshold drift rather than genuinely cleaner claims.",
+    "Claims database APIs (ISO ClaimSearch, LexisNexis) typically bill per lookup and rate-limit; cache repeat entity (policyholder, VIN, address) lookups within a rolling 30-day window.",
+    "State-level claims-handling deadlines vary (e.g., prompt-pay statutes); SLA timers must be state-aware, not a single global clock."
+  ],
+  "integrations": [
+    {
+      "system": "FNOL Intake Channels (Call Center, Web Portal, Email/Scan Upload)",
+      "type": "Trigger",
+      "note": "Call recordings, web-form submissions, and scanned document packets"
+    },
+    {
+      "system": "Policy Administration System (Guidewire / Duck Creek / Majesco)",
+      "type": "Read",
+      "note": "Policy status, inception date, limits, deductibles, endorsements"
+    },
+    {
+      "system": "Policy Document Store",
+      "type": "Read",
+      "note": "Policy language indexed in Azure AI Search for RAG coverage validation"
+    },
+    {
+      "system": "ISO ClaimSearch / LexisNexis C.L.U.E.",
+      "type": "Read",
+      "note": "Prior claim history and cross-carrier fraud pattern lookups"
+    },
+    {
+      "system": "Claims Management System (ClaimCenter)",
+      "type": "Write",
+      "note": "Creates claim record, sets reserve, updates status through lifecycle"
+    },
+    {
+      "system": "Adjuster Workstation / Queue",
+      "type": "HITL",
+      "note": "Pre-loaded triage packet with extracted claim data, coverage validation, and evidence-linked fraud flags"
+    },
+    {
+      "system": "Payment / Disbursement System",
+      "type": "Write",
+      "note": "Payout instruction written only after explicit human authorization — never agent-initiated"
+    },
+    {
+      "system": "Audit Log",
+      "type": "Write",
+      "note": "Immutable log of every routing decision, evidence snapshot, and authorization — required for regulatory claims-handling compliance"
+    }
+  ]
+}
