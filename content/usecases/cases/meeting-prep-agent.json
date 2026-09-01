@@ -139,5 +139,9 @@
       "type": "Write",
       "note": "Delivers formatted briefing 30 min before meeting"
     }
+  ],
+  "taxonomyIds": [
+    "parallel-subagents",
+    "research-synthesize-generate"
   ]
 }

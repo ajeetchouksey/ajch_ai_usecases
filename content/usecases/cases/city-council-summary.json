@@ -127,5 +127,9 @@
       "type": "Write",
       "note": "Sends summary digest to subscribed residents"
     }
+  ],
+  "taxonomyIds": [
+    "document-rag",
+    "research-synthesize-generate"
   ]
 }

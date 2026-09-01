@@ -2,21 +2,175 @@
   "id": "contract-redline-playbook-agent",
   "title": "Contract Redline & Playbook Compliance Agent",
   "vertical": "legal",
-  "patterns": ["trigger-extract-validate-route", "document-rag", "document-eval-structured-output", "hitl-approval-gate"],
+  "patterns": [
+    "trigger-extract-validate-route",
+    "document-rag",
+    "document-eval-structured-output",
+    "hitl-approval-gate"
+  ],
   "problem": "In-house legal teams at mid-size companies review 200-500 vendor agreements, NDAs, and MSAs per quarter, with each contract requiring 45-90 minutes of clause-by-clause comparison against approved fallback positions. Manual review is inconsistent across reviewers — internal reviews at several corporate legal departments have found two attorneys applying different fallback language for the same clause category 15-20% of the time — and backlogs routinely stretch contract turnaround to 2-3 weeks, creating deal friction with sales and procurement counterparts who are waiting on a signed agreement.",
   "solution": "A trigger-extract-validate-route agent normalises incoming contracts — Word documents carrying counterparty track changes, flattened PDFs, or CLM portal uploads — into clause-level segments, retrieves the matching position for each clause via RAG over the legal team's versioned playbook (approved / fallback / no-go by clause category), and produces a structured verdict per clause with a confidence score. It drafts a redline with rationale tied directly to the cited playbook position for anything not already at the approved language, but nothing is transmitted to the counterparty until an attorney reviews and signs off — the agent proposes, it never sends.",
   "whoItsFor": "In-House Counsel, Legal Operations Managers, Contract Managers, Procurement-Legal Liaisons",
-  "workflowSteps": ["Trigger: contract received via CLM intake, email attachment, or contract review portal — Word document (often with counterparty track changes) or PDF", "IntakeAgent normalises format: Word documents are parsed via a track-changes-aware API that preserves authorship and revision marks; PDF contracts (scanned or flattened) run through OCR + layout extraction; contract type is classified (NDA, MSA, vendor agreement, SOW)", "ClauseSegmentationAgent splits the contract into discrete clauses/sections with position anchors (section/paragraph reference) so any redline can be mapped back to the exact source location", "PlaybookRetrievalAgent runs RAG over the legal team's versioned clause playbook (indexed by category — indemnification, limitation of liability, IP assignment, data protection, termination, governing law) to retrieve the matching approved/fallback/no-go position for each segmented clause", "ClauseEvalAgent produces a structured verdict per clause — matches approved language / within fallback tolerance / deviates beyond fallback (no-go or novel) / clause type not covered by playbook — each with a confidence score", "RedlineDraftAgent drafts a proposed redline for any clause not already at the approved position, with rationale text that cites the specific playbook position and precedent language it was drafted from", "Routing gate: clauses within fallback tolerance at high confidence move to a pre-approved batch; any no-go term, novel clause language, low-confidence classification, or contract above a defined value/risk threshold routes to the attorney review queue", "Attorney reviews the redline packet — proposed redline, rationale, confidence, flagged deviations, inline diff against the playbook position — and can accept, edit, or reject each redline individually", "HITL approval gate: nothing leaves the organisation until attorney sign-off; on approval, the agent compiles the final Word track-changes document and returns it via the originating channel (email or CLM) to the counterparty", "Every clause verdict, playbook version used, and attorney edit is written to the audit log with a snapshot of the applicable playbook at decision time"],
+  "workflowSteps": [
+    "Trigger: contract received via CLM intake, email attachment, or contract review portal — Word document (often with counterparty track changes) or PDF",
+    "IntakeAgent normalises format: Word documents are parsed via a track-changes-aware API that preserves authorship and revision marks; PDF contracts (scanned or flattened) run through OCR + layout extraction; contract type is classified (NDA, MSA, vendor agreement, SOW)",
+    "ClauseSegmentationAgent splits the contract into discrete clauses/sections with position anchors (section/paragraph reference) so any redline can be mapped back to the exact source location",
+    "PlaybookRetrievalAgent runs RAG over the legal team's versioned clause playbook (indexed by category — indemnification, limitation of liability, IP assignment, data protection, termination, governing law) to retrieve the matching approved/fallback/no-go position for each segmented clause",
+    "ClauseEvalAgent produces a structured verdict per clause — matches approved language / within fallback tolerance / deviates beyond fallback (no-go or novel) / clause type not covered by playbook — each with a confidence score",
+    "RedlineDraftAgent drafts a proposed redline for any clause not already at the approved position, with rationale text that cites the specific playbook position and precedent language it was drafted from",
+    "Routing gate: clauses within fallback tolerance at high confidence move to a pre-approved batch; any no-go term, novel clause language, low-confidence classification, or contract above a defined value/risk threshold routes to the attorney review queue",
+    "Attorney reviews the redline packet — proposed redline, rationale, confidence, flagged deviations, inline diff against the playbook position — and can accept, edit, or reject each redline individually",
+    "HITL approval gate: nothing leaves the organisation until attorney sign-off; on approval, the agent compiles the final Word track-changes document and returns it via the originating channel (email or CLM) to the counterparty",
+    "Every clause verdict, playbook version used, and attorney edit is written to the audit log with a snapshot of the applicable playbook at decision time"
+  ],
   "keyInsights": "The leverage isn't the redline draft — it's getting every clause confidently bucketed against a versioned playbook first; once that classification is trustworthy, 55-65% of routine NDA/MSA paper needs no attorney drafting time at all, only a sign-off glance. Rationale generation has to run in citation-only mode, quoting the retrieved playbook chunk rather than reasoning freely about what 'should' be acceptable — an LLM confidently inventing a plausible-sounding fallback position that was never actually approved is a worse failure than a slow reviewer, because it looks authoritative on the page.",
-  "relatedExams": [{"exam": "ccdf", "domain": 3, "why": "Agents and Workflows — trigger-extract-validate-route with clause-level routing gate"}, {"exam": "ccdf", "domain": 8, "why": "Eval, Testing, and Debugging — structured clause-by-clause evaluation against a versioned rubric"}, {"exam": "ccap", "domain": 4, "why": "Governance, Safety & Risk — mandatory attorney sign-off before any external transmission"}],
-  "relatedInterviewQs": ["q-hitl-001", "q-rag-001", "q-eval-001"],
+  "relatedExams": [
+    {
+      "exam": "ccdf",
+      "domain": 3,
+      "why": "Agents and Workflows — trigger-extract-validate-route with clause-level routing gate"
+    },
+    {
+      "exam": "ccdf",
+      "domain": 8,
+      "why": "Eval, Testing, and Debugging — structured clause-by-clause evaluation against a versioned rubric"
+    },
+    {
+      "exam": "ccap",
+      "domain": 4,
+      "why": "Governance, Safety & Risk — mandatory attorney sign-off before any external transmission"
+    }
+  ],
+  "relatedInterviewQs": [
+    "q-hitl-001",
+    "q-rag-001",
+    "q-eval-001"
+  ],
   "examScenarioPotential": "high",
   "blogPotential": "high",
   "mermaidDiagram": "flowchart TD\n  A1([Word Doc\\nCounterparty Track Changes]) --> B[IntakeAgent\\nNormalise Format]\n  A2([Flattened PDF]) --> B\n  A3([CLM Portal / Email Intake]) --> B\n  B --> C[ClauseSegmentationAgent\\nSplit + Anchor Clauses]\n  C --> D[PlaybookRetrievalAgent\\nRAG over Clause Playbook]\n  D --> E[ClauseEvalAgent\\nApproved / Fallback / No-Go / Novel]\n  E --> F[RedlineDraftAgent\\nDraft Redline + Cited Rationale]\n  F --> G{Within Fallback Tolerance\\n& High Confidence?}\n  G -->|Yes| H[Pre-Approved Batch]\n  G -->|No-Go / Novel /\\nLow Confidence / High-Value| I[Attorney Review Queue]\n  H --> J[Attorney Review Packet]\n  I --> J\n  J --> K{Attorney\\nSign-Off?}\n  K -->|Approved| L([Compile Final Track-Changes Doc\\n→ Send to Counterparty])\n  K -->|Edits Needed| M([Attorney Edits Redline])\n  M --> J\n  K -->|Rejected| N([Escalate / Hold Contract])",
   "architectureNotes": "Word-native track-changes parsing is treated as the primary path, not a document-AI afterthought — counterparty redlines arrive as revision marks, and a layout-extraction model built for scanned forms will happily flatten and lose that structure, so a dedicated track-changes-aware parser runs first with OCR/layout extraction reserved for genuinely flattened PDFs. The playbook is a governed, versioned RAG source exactly like a policy corpus: every clause verdict is tagged with the playbook version it was evaluated against, and no clause can be auto-approved against a playbook entry that hasn't been re-confirmed within a rolling window, because a stale fallback position silently sent to a counterparty is a real legal exposure, not a UX bug. The routing gate (pre-approved batch vs. attorney queue) is a soft triage decision; the outbound-send gate is a hard, code-enforced stop — the two must never be collapsed into one step, since a misrouted low-risk clause is recoverable but an unauthorised redline sent to a counterparty is not.",
-  "relatedUseCases": [{"id": "insurance-claims-triage", "label": "FNOL Claims Intake Triage & Adjudication Support Agent", "vertical": "Insurance"}, {"id": "soc2-compliance-eval", "label": "SOC 2 Report Evaluation Agent", "vertical": "Compliance"}, {"id": "policy-qa-rag", "label": "Insurance Policy Q&A Agent", "vertical": "Insurance"}],
-  "techStack": [{"category": "LLM", "tools": ["GPT-4o (clause extraction and structured classification)", "claude-3-5-sonnet (redline drafting and citation-grounded rationale)"]}, {"category": "Document / Word Processing", "tools": ["Track-changes-aware docx parser (preserves revision marks and authorship)", "Litera Compare (Word-native redline diffing against last-sent version)", "Azure AI Document Intelligence (layout extraction for flattened/scanned PDF contracts)", "AWS Textract (secondary OCR fallback for low-quality scans)"]}, {"category": "Playbook RAG", "tools": ["Azure AI Search (hybrid vector + keyword over indexed clause playbook)", "voyage-law-2 (domain-tuned legal embeddings)"]}, {"category": "Workflow Orchestration", "tools": ["Azure AI Foundry agent framework", "Temporal (durable workflow across intake, eval, and HITL gates)"]}, {"category": "CLM / Contract Systems", "tools": ["Ironclad", "DocuSign CLM", "Icertis"]}],
-  "failureModes": [{"mode": "Playbook drift — attorneys agree to an updated fallback position verbally or in a side conversation without updating the indexed playbook, so the agent keeps evaluating against a stale position", "mitigation": "Every clause verdict is tagged with the playbook version and last-updated date used; clauses cannot be auto-approved against a playbook entry older than a defined staleness threshold, forcing a re-confirmation cycle rather than silent drift. Playbook changes require an explicit versioned commit, not an inline edit."}, {"mode": "Ambiguous or combined clause language (e.g., a single clause mixing indemnification and limitation-of-liability terms) doesn't map cleanly to one playbook category", "mitigation": "ClauseEvalAgent returns multi-label classification instead of forcing a single category; any clause matching more than one category, or none with sufficient confidence, is routed to the attorney queue with the ambiguity itself surfaced rather than silently force-fit."}, {"mode": "Counterparty submits a redline as a flattened, non-native PDF, stripping the revision-mark structure the workflow depends on for clause-level diffing", "mitigation": "Intake step detects the absence of embedded track-changes metadata and either requests a Word-native resubmission from the counterparty relationship owner or falls back to a visual diff against the last version the legal team sent, flagged as lower-confidence extraction."}, {"mode": "Hallucinated legal rationale — the model cites a playbook position that doesn't actually exist, or paraphrases it into something stronger or weaker than what was approved", "mitigation": "Rationale generation runs in citation-only mode: the drafted rationale must quote the exact retrieved playbook chunk span, and a verification step checks the quoted text against the source chunk before it's shown to the attorney; any rationale that fails the match is flagged as unverified rather than displayed as authoritative."}, {"mode": "Attorney review queue becomes the bottleneck as contract volume scales, quietly reintroducing the original turnaround problem", "mitigation": "Tiered SLA queue separates fast-track template NDAs from complex MSA/vendor paper; pre-approved batch rate is tracked as a platform SLO and a sustained drop below target triggers investigation into whether playbook coverage or confidence-threshold has regressed, not just 'add more reviewers'."}],
-  "scalingConsiderations": ["Automated clause evaluation compresses initial review from 45-90 minutes (manual) to under 10 minutes of attorney time per contract for routine NDA/MSA paper.", "Pre-approved fast-track rate should target 55-65% of routine incoming contracts; monitor monthly — a sudden spike can indicate playbook or confidence-threshold drift rather than genuinely cleaner paper from counterparties.", "Playbook re-index cadence should be incremental, not full-corpus, since fallback positions typically change in response to specific events (a new data-protection regulation, a renegotiated master template) affecting 10-15% of the playbook at a time.", "Contract volume spikes around fiscal year-end vendor renewals and quarterly procurement cycles; queue-based attorney assignment with priority scoring (contract value, risk flags) handles burst load better than a shared inbox."],
-  "integrations": [{"system": "Contract Intake (CLM Portal / Email)", "type": "Trigger", "note": "Word documents with counterparty track changes, flattened PDFs, or CLM uploads"}, {"system": "Legal Clause Playbook (SharePoint / CLM Playbook Module)", "type": "Read", "note": "Versioned approved/fallback/no-go positions indexed in Azure AI Search for RAG retrieval"}, {"system": "CLM System (Ironclad / DocuSign CLM / Icertis)", "type": "Write", "note": "Creates contract record, updates review status through the workflow lifecycle"}, {"system": "Attorney Review Queue / UI", "type": "HITL", "note": "Redline packet with proposed redline, cited rationale, confidence, and inline diff against playbook position"}, {"system": "Counterparty Channel (Email / CLM Exchange)", "type": "Write", "note": "Final track-changes document sent only after explicit attorney sign-off — never agent-initiated"}, {"system": "Audit Log", "type": "Write", "note": "Immutable record of every clause verdict, playbook version, and attorney edit — required for outside-counsel and E&O review"}]
+  "relatedUseCases": [
+    {
+      "id": "insurance-claims-triage",
+      "label": "FNOL Claims Intake Triage & Adjudication Support Agent",
+      "vertical": "Insurance"
+    },
+    {
+      "id": "soc2-compliance-eval",
+      "label": "SOC 2 Report Evaluation Agent",
+      "vertical": "Compliance"
+    },
+    {
+      "id": "policy-qa-rag",
+      "label": "Insurance Policy Q&A Agent",
+      "vertical": "Insurance"
+    }
+  ],
+  "techStack": [
+    {
+      "category": "LLM",
+      "tools": [
+        "GPT-4o (clause extraction and structured classification)",
+        "claude-3-5-sonnet (redline drafting and citation-grounded rationale)"
+      ]
+    },
+    {
+      "category": "Document / Word Processing",
+      "tools": [
+        "Track-changes-aware docx parser (preserves revision marks and authorship)",
+        "Litera Compare (Word-native redline diffing against last-sent version)",
+        "Azure AI Document Intelligence (layout extraction for flattened/scanned PDF contracts)",
+        "AWS Textract (secondary OCR fallback for low-quality scans)"
+      ]
+    },
+    {
+      "category": "Playbook RAG",
+      "tools": [
+        "Azure AI Search (hybrid vector + keyword over indexed clause playbook)",
+        "voyage-law-2 (domain-tuned legal embeddings)"
+      ]
+    },
+    {
+      "category": "Workflow Orchestration",
+      "tools": [
+        "Azure AI Foundry agent framework",
+        "Temporal (durable workflow across intake, eval, and HITL gates)"
+      ]
+    },
+    {
+      "category": "CLM / Contract Systems",
+      "tools": [
+        "Ironclad",
+        "DocuSign CLM",
+        "Icertis"
+      ]
+    }
+  ],
+  "failureModes": [
+    {
+      "mode": "Playbook drift — attorneys agree to an updated fallback position verbally or in a side conversation without updating the indexed playbook, so the agent keeps evaluating against a stale position",
+      "mitigation": "Every clause verdict is tagged with the playbook version and last-updated date used; clauses cannot be auto-approved against a playbook entry older than a defined staleness threshold, forcing a re-confirmation cycle rather than silent drift. Playbook changes require an explicit versioned commit, not an inline edit."
+    },
+    {
+      "mode": "Ambiguous or combined clause language (e.g., a single clause mixing indemnification and limitation-of-liability terms) doesn't map cleanly to one playbook category",
+      "mitigation": "ClauseEvalAgent returns multi-label classification instead of forcing a single category; any clause matching more than one category, or none with sufficient confidence, is routed to the attorney queue with the ambiguity itself surfaced rather than silently force-fit."
+    },
+    {
+      "mode": "Counterparty submits a redline as a flattened, non-native PDF, stripping the revision-mark structure the workflow depends on for clause-level diffing",
+      "mitigation": "Intake step detects the absence of embedded track-changes metadata and either requests a Word-native resubmission from the counterparty relationship owner or falls back to a visual diff against the last version the legal team sent, flagged as lower-confidence extraction."
+    },
+    {
+      "mode": "Hallucinated legal rationale — the model cites a playbook position that doesn't actually exist, or paraphrases it into something stronger or weaker than what was approved",
+      "mitigation": "Rationale generation runs in citation-only mode: the drafted rationale must quote the exact retrieved playbook chunk span, and a verification step checks the quoted text against the source chunk before it's shown to the attorney; any rationale that fails the match is flagged as unverified rather than displayed as authoritative."
+    },
+    {
+      "mode": "Attorney review queue becomes the bottleneck as contract volume scales, quietly reintroducing the original turnaround problem",
+      "mitigation": "Tiered SLA queue separates fast-track template NDAs from complex MSA/vendor paper; pre-approved batch rate is tracked as a platform SLO and a sustained drop below target triggers investigation into whether playbook coverage or confidence-threshold has regressed, not just 'add more reviewers'."
+    }
+  ],
+  "scalingConsiderations": [
+    "Automated clause evaluation compresses initial review from 45-90 minutes (manual) to under 10 minutes of attorney time per contract for routine NDA/MSA paper.",
+    "Pre-approved fast-track rate should target 55-65% of routine incoming contracts; monitor monthly — a sudden spike can indicate playbook or confidence-threshold drift rather than genuinely cleaner paper from counterparties.",
+    "Playbook re-index cadence should be incremental, not full-corpus, since fallback positions typically change in response to specific events (a new data-protection regulation, a renegotiated master template) affecting 10-15% of the playbook at a time.",
+    "Contract volume spikes around fiscal year-end vendor renewals and quarterly procurement cycles; queue-based attorney assignment with priority scoring (contract value, risk flags) handles burst load better than a shared inbox."
+  ],
+  "integrations": [
+    {
+      "system": "Contract Intake (CLM Portal / Email)",
+      "type": "Trigger",
+      "note": "Word documents with counterparty track changes, flattened PDFs, or CLM uploads"
+    },
+    {
+      "system": "Legal Clause Playbook (SharePoint / CLM Playbook Module)",
+      "type": "Read",
+      "note": "Versioned approved/fallback/no-go positions indexed in Azure AI Search for RAG retrieval"
+    },
+    {
+      "system": "CLM System (Ironclad / DocuSign CLM / Icertis)",
+      "type": "Write",
+      "note": "Creates contract record, updates review status through the workflow lifecycle"
+    },
+    {
+      "system": "Attorney Review Queue / UI",
+      "type": "HITL",
+      "note": "Redline packet with proposed redline, cited rationale, confidence, and inline diff against playbook position"
+    },
+    {
+      "system": "Counterparty Channel (Email / CLM Exchange)",
+      "type": "Write",
+      "note": "Final track-changes document sent only after explicit attorney sign-off — never agent-initiated"
+    },
+    {
+      "system": "Audit Log",
+      "type": "Write",
+      "note": "Immutable record of every clause verdict, playbook version, and attorney edit — required for outside-counsel and E&O review"
+    }
+  ],
+  "taxonomyIds": [
+    "trigger-extract-validate-route",
+    "document-rag",
+    "document-eval-structured-output",
+    "hitl-approval-gate"
+  ]
 }

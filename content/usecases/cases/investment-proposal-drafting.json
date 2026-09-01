@@ -132,5 +132,9 @@
       "type": "Write",
       "note": "Archives signed proposal with version history"
     }
+  ],
+  "taxonomyIds": [
+    "research-synthesize-generate",
+    "document-rag"
   ]
 }

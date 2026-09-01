@@ -151,5 +151,9 @@
       "type": "HITL",
       "note": "Routes exceptions to human reviewers with full context"
     }
+  ],
+  "taxonomyIds": [
+    "trigger-extract-validate-route",
+    "hitl-approval-gate"
   ]
 }

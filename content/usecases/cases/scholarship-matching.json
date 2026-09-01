@@ -131,5 +131,9 @@
       "type": "Write",
       "note": "Delivers personalised match report and application checklist"
     }
+  ],
+  "taxonomyIds": [
+    "document-rag",
+    "research-synthesize-generate"
   ]
 }

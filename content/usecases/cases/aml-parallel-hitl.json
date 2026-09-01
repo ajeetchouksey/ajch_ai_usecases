@@ -151,5 +151,10 @@
       "type": "HITL",
       "note": "Serves full transaction context and draft SAR for review"
     }
+  ],
+  "taxonomyIds": [
+    "parallel-subagents",
+    "hitl-approval-gate",
+    "trigger-extract-validate-route"
   ]
 }

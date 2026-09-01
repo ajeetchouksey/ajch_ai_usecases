@@ -315,10 +315,19 @@
           "why": "Solution Design — coordinator-specialist architecture, saga pattern for partial failure"
         }
       ],
-      "relatedInterviewQs": ["q-orch-001", "q-hitl-001", "q-orch-002"],
+      "relatedInterviewQs": [
+        "q-orch-001",
+        "q-hitl-001",
+        "q-orch-002"
+      ],
       "examScenarioPotential": "high",
       "blogPotential": "high",
-      "mermaidDiagram": "flowchart TD\n  A([Signed Offer Event]) --> B[OrchestratorAgent\\nRead employee record]\n  B --> C{Equity grant?}\n  C -->|Yes| D[HITL Gate\\nManager approval]\n  C -->|No| E[Parallel Fan-Out]\n  D -->|Approved| E\n  D -->|Rejected| F([Escalate to HR Ops])\n  E --> G[IdentityAgent\\nEntra ID + M365]\n  E --> H[BenefitsAgent\\nHealth + 401k + ESPP]\n  E --> I[DocumentAgent\\nNDA + I-9 via DocuSign]\n  E --> J[CalendarAgent\\nOrientation via Graph API]\n  G & H & I & J --> K{All complete?}\n  K -->|Yes| L([Welcome Email + Credentials])\n  K -->|Retry| M[Checkpoint Resume\\nIdempotency Key]"
+      "mermaidDiagram": "flowchart TD\n  A([Signed Offer Event]) --> B[OrchestratorAgent\\nRead employee record]\n  B --> C{Equity grant?}\n  C -->|Yes| D[HITL Gate\\nManager approval]\n  C -->|No| E[Parallel Fan-Out]\n  D -->|Approved| E\n  D -->|Rejected| F([Escalate to HR Ops])\n  E --> G[IdentityAgent\\nEntra ID + M365]\n  E --> H[BenefitsAgent\\nHealth + 401k + ESPP]\n  E --> I[DocumentAgent\\nNDA + I-9 via DocuSign]\n  E --> J[CalendarAgent\\nOrientation via Graph API]\n  G & H & I & J --> K{All complete?}\n  K -->|Yes| L([Welcome Email + Credentials])\n  K -->|Retry| M[Checkpoint Resume\\nIdempotency Key]",
+      "taxonomyIds": [
+        "parallel-subagents",
+        "hitl-approval-gate",
+        "trigger-extract-validate-route"
+      ]
     },
     {
       "id": "invoice-ops-hitl",
@@ -363,7 +372,11 @@
       ],
       "examScenarioPotential": "high",
       "blogPotential": "high",
-      "mermaidDiagram": "flowchart LR\n  A([Email Trigger]) --> B[Extract Invoice Fields]\n  B --> C{Matches PO?}\n  C -->|Yes| D[Auto-Approve]\n  C -->|Anomaly| E[HITL Review Gate]\n  E -->|Approved| D\n  E -->|Rejected| F([Flag and Escalate])\n  D --> G([ERP Write + Idempotency Key])"
+      "mermaidDiagram": "flowchart LR\n  A([Email Trigger]) --> B[Extract Invoice Fields]\n  B --> C{Matches PO?}\n  C -->|Yes| D[Auto-Approve]\n  C -->|Anomaly| E[HITL Review Gate]\n  E -->|Approved| D\n  E -->|Rejected| F([Flag and Escalate])\n  D --> G([ERP Write + Idempotency Key])",
+      "taxonomyIds": [
+        "trigger-extract-validate-route",
+        "hitl-approval-gate"
+      ]
     },
     {
       "id": "aml-parallel-hitl",
@@ -409,7 +422,12 @@
       ],
       "examScenarioPotential": "high",
       "blogPotential": "medium",
-      "mermaidDiagram": "flowchart LR\n  A([AML Alert Email]) --> B[Coordinator]\n  B --> C1[Public Profile Search]\n  B --> C2[Bank Account Lookup]\n  B --> C3[AML Policy Docs]\n  C1 & C2 & C3 --> D[Merge Typed Evidence]\n  D --> E[Draft Closure Decision]\n  E --> F[HITL Reviewer Portal]\n  F -->|Approved| G([Close Account + Audit Log])\n  F -->|Rejected| H([Escalate to Senior Officer])"
+      "mermaidDiagram": "flowchart LR\n  A([AML Alert Email]) --> B[Coordinator]\n  B --> C1[Public Profile Search]\n  B --> C2[Bank Account Lookup]\n  B --> C3[AML Policy Docs]\n  C1 & C2 & C3 --> D[Merge Typed Evidence]\n  D --> E[Draft Closure Decision]\n  E --> F[HITL Reviewer Portal]\n  F -->|Approved| G([Close Account + Audit Log])\n  F -->|Rejected| H([Escalate to Senior Officer])",
+      "taxonomyIds": [
+        "parallel-subagents",
+        "hitl-approval-gate",
+        "trigger-extract-validate-route"
+      ]
     },
     {
       "id": "investor-helpdesk",
@@ -453,7 +471,11 @@
       ],
       "examScenarioPotential": "high",
       "blogPotential": "high",
-      "mermaidDiagram": "flowchart LR\n  A([Investor Query]) --> B[Coordinator LLM]\n  B --> C1[CRM-LLM: Account History]\n  B --> C2[Product-LLM: Investment Docs]\n  C1 & C2 --> D[Typed Merge]\n  D --> E[Formatter-LLM: Compliance Language]\n  E --> F([Compliant Personalized Response])"
+      "mermaidDiagram": "flowchart LR\n  A([Investor Query]) --> B[Coordinator LLM]\n  B --> C1[CRM-LLM: Account History]\n  B --> C2[Product-LLM: Investment Docs]\n  C1 & C2 --> D[Typed Merge]\n  D --> E[Formatter-LLM: Compliance Language]\n  E --> F([Compliant Personalized Response])",
+      "taxonomyIds": [
+        "parallel-subagents",
+        "document-rag"
+      ]
     },
     {
       "id": "soc2-compliance-eval",
@@ -496,7 +518,10 @@
       ],
       "examScenarioPotential": "high",
       "blogPotential": "medium",
-      "mermaidDiagram": "flowchart TD\n  A([SOC 2 PDF Upload]) --> B[Extract Controls Section by Section]\n  B --> C[Evaluate vs FFIEC Framework]\n  C --> D{Rating per Control}\n  D -->|Pass| E[CUEC or URSIT Rating]\n  D -->|Gap Found| F[Flag + Remediation Note]\n  E & F --> G[Structured Evaluation Report]\n  G --> H([SharePoint Upload])\n  G --> I([Slack Notification])"
+      "mermaidDiagram": "flowchart TD\n  A([SOC 2 PDF Upload]) --> B[Extract Controls Section by Section]\n  B --> C[Evaluate vs FFIEC Framework]\n  C --> D{Rating per Control}\n  D -->|Pass| E[CUEC or URSIT Rating]\n  D -->|Gap Found| F[Flag + Remediation Note]\n  E & F --> G[Structured Evaluation Report]\n  G --> H([SharePoint Upload])\n  G --> I([Slack Notification])",
+      "taxonomyIds": [
+        "document-eval-structured-output"
+      ]
     },
     {
       "id": "policy-qa-rag",
@@ -539,7 +564,10 @@
       ],
       "examScenarioPotential": "high",
       "blogPotential": "high",
-      "mermaidDiagram": "flowchart LR\n  A([User Question]) --> B[Embed Query]\n  B --> C[RBAC Pre-Filter by Policy Type]\n  C --> D[Vector Search Top-K]\n  D --> E{Freshness Gate}\n  E -->|Current| F[LLM Answer with Citations]\n  E -->|Stale| G[Staleness Disclaimer + LLM Answer]\n  F & G --> H([Grounded Answer])"
+      "mermaidDiagram": "flowchart LR\n  A([User Question]) --> B[Embed Query]\n  B --> C[RBAC Pre-Filter by Policy Type]\n  C --> D[Vector Search Top-K]\n  D --> E{Freshness Gate}\n  E -->|Current| F[LLM Answer with Citations]\n  E -->|Stale| G[Staleness Disclaimer + LLM Answer]\n  F & G --> H([Grounded Answer])",
+      "taxonomyIds": [
+        "document-rag"
+      ]
     },
     {
       "id": "policy-memo-writer",
@@ -583,7 +611,11 @@
       ],
       "examScenarioPotential": "medium",
       "blogPotential": "high",
-      "mermaidDiagram": "flowchart TD\n  A([Policy Brief Input]) --> B[Parallel Research]\n  B --> C1[Internal Memo Archive]\n  B --> C2[Regulatory Database]\n  B --> C3[Public Comment Records]\n  C1 & C2 & C3 --> D[Synthesize Key Findings]\n  D --> E[Draft Memo with Source Attribution]\n  E --> F([Supervisor Review])"
+      "mermaidDiagram": "flowchart TD\n  A([Policy Brief Input]) --> B[Parallel Research]\n  B --> C1[Internal Memo Archive]\n  B --> C2[Regulatory Database]\n  B --> C3[Public Comment Records]\n  C1 & C2 & C3 --> D[Synthesize Key Findings]\n  D --> E[Draft Memo with Source Attribution]\n  E --> F([Supervisor Review])",
+      "taxonomyIds": [
+        "research-synthesize-generate",
+        "document-rag"
+      ]
     },
     {
       "id": "inbound-lead-magnet",
@@ -621,7 +653,11 @@
       ],
       "examScenarioPotential": "medium",
       "blogPotential": "high",
-      "mermaidDiagram": "flowchart LR\n  A([Form Submission]) --> B[Enrich Lead Data]\n  B --> C1[Web Search: Company News]\n  B --> C2[LinkedIn: Company Profile]\n  C1 & C2 --> D[Generate Custom PDF]\n  D --> E([Email to Prospect])\n  D --> F([HubSpot CRM Write + Idempotency Key])"
+      "mermaidDiagram": "flowchart LR\n  A([Form Submission]) --> B[Enrich Lead Data]\n  B --> C1[Web Search: Company News]\n  B --> C2[LinkedIn: Company Profile]\n  C1 & C2 --> D[Generate Custom PDF]\n  D --> E([Email to Prospect])\n  D --> F([HubSpot CRM Write + Idempotency Key])",
+      "taxonomyIds": [
+        "trigger-extract-validate-route",
+        "research-synthesize-generate"
+      ]
     },
     {
       "id": "city-council-summary",
@@ -659,7 +695,11 @@
       ],
       "examScenarioPotential": "medium",
       "blogPotential": "medium",
-      "mermaidDiagram": "flowchart TD\n  A([Meeting Recording + Transcript]) --> B[Transcription Agent]\n  B --> C[Summary Agent: Agenda + Decisions + Quotes]\n  C --> D[Index with Meeting Metadata]\n  D --> E([Natural Language Q&A Across Full Meeting History])"
+      "mermaidDiagram": "flowchart TD\n  A([Meeting Recording + Transcript]) --> B[Transcription Agent]\n  B --> C[Summary Agent: Agenda + Decisions + Quotes]\n  C --> D[Index with Meeting Metadata]\n  D --> E([Natural Language Q&A Across Full Meeting History])",
+      "taxonomyIds": [
+        "document-rag",
+        "research-synthesize-generate"
+      ]
     },
     {
       "id": "internal-audit-testing",
@@ -704,7 +744,11 @@
       ],
       "examScenarioPotential": "high",
       "blogPotential": "medium",
-      "mermaidDiagram": "flowchart TD\n  A([Audit Objectives]) --> C[Extract and Map to Criteria]\n  B([Loan File Population]) --> C\n  C --> D{Exception Found?}\n  D -->|Yes| E[Flag + Evidence Citation]\n  D -->|No| F[Objective Pass]\n  E & F --> G[Draft Workpaper Section]\n  G --> H[Auditor Sign-Off HITL Gate]\n  H --> I([Archive])"
+      "mermaidDiagram": "flowchart TD\n  A([Audit Objectives]) --> C[Extract and Map to Criteria]\n  B([Loan File Population]) --> C\n  C --> D{Exception Found?}\n  D -->|Yes| E[Flag + Evidence Citation]\n  D -->|No| F[Objective Pass]\n  E & F --> G[Draft Workpaper Section]\n  G --> H[Auditor Sign-Off HITL Gate]\n  H --> I([Archive])",
+      "taxonomyIds": [
+        "document-eval-structured-output",
+        "hitl-approval-gate"
+      ]
     },
     {
       "id": "vendor-onboarding",
@@ -744,7 +788,11 @@
       ],
       "examScenarioPotential": "high",
       "blogPotential": "medium",
-      "mermaidDiagram": "flowchart LR\n  A([Vendor Form + Docs]) --> B[Parallel Parse]\n  B --> C1[Entity + Tax ID]\n  B --> C2[Banking Details]\n  B --> C3[Certifications]\n  C1 & C2 & C3 --> D[Validate + Dedup Check]\n  D --> E[HITL Approval Gate]\n  E -->|Approved| F([Update Vendor Master + Notify])\n  E -->|Incomplete| G([Request Missing Docs from Vendor])"
+      "mermaidDiagram": "flowchart LR\n  A([Vendor Form + Docs]) --> B[Parallel Parse]\n  B --> C1[Entity + Tax ID]\n  B --> C2[Banking Details]\n  B --> C3[Certifications]\n  C1 & C2 & C3 --> D[Validate + Dedup Check]\n  D --> E[HITL Approval Gate]\n  E -->|Approved| F([Update Vendor Master + Notify])\n  E -->|Incomplete| G([Request Missing Docs from Vendor])",
+      "taxonomyIds": [
+        "trigger-extract-validate-route",
+        "hitl-approval-gate"
+      ]
     },
     {
       "id": "investment-proposal-drafting",
@@ -782,7 +830,11 @@
       ],
       "examScenarioPotential": "medium",
       "blogPotential": "medium",
-      "mermaidDiagram": "flowchart LR\n  A([RFP or DDQ Input]) --> B[Classify Request Type]\n  B --> C[Search Archives]\n  C --> D1[Past Pitch Books]\n  C --> D2[ADV Filings]\n  C --> D3[DDQ Archives]\n  D1 & D2 & D3 --> E[Draft Sections: House Style + Disclosures]\n  E --> F([Lead Advisor Review])"
+      "mermaidDiagram": "flowchart LR\n  A([RFP or DDQ Input]) --> B[Classify Request Type]\n  B --> C[Search Archives]\n  C --> D1[Past Pitch Books]\n  C --> D2[ADV Filings]\n  C --> D3[DDQ Archives]\n  D1 & D2 & D3 --> E[Draft Sections: House Style + Disclosures]\n  E --> F([Lead Advisor Review])",
+      "taxonomyIds": [
+        "research-synthesize-generate",
+        "document-rag"
+      ]
     },
     {
       "id": "safety-ops-chatbot",
@@ -818,7 +870,10 @@
       ],
       "examScenarioPotential": "medium",
       "blogPotential": "high",
-      "mermaidDiagram": "flowchart LR\n  A([Safety Question]) --> B[Parallel Search]\n  B --> C1[OSHA Standards - Regulatory Authority]\n  B --> C2[Company Safety Policies - Internal Guidance]\n  B --> C3[Incident Records - Historical Data]\n  C1 & C2 & C3 --> D[Synthesize with Source Hierarchy]\n  D --> E([Compliant Answer with Citations])"
+      "mermaidDiagram": "flowchart LR\n  A([Safety Question]) --> B[Parallel Search]\n  B --> C1[OSHA Standards - Regulatory Authority]\n  B --> C2[Company Safety Policies - Internal Guidance]\n  B --> C3[Incident Records - Historical Data]\n  C1 & C2 & C3 --> D[Synthesize with Source Hierarchy]\n  D --> E([Compliant Answer with Citations])",
+      "taxonomyIds": [
+        "document-rag"
+      ]
     },
     {
       "id": "meeting-prep-agent",
@@ -856,7 +911,11 @@
       ],
       "examScenarioPotential": "medium",
       "blogPotential": "high",
-      "mermaidDiagram": "flowchart LR\n  A([Attendees + Meeting Context]) --> B[Coordinator]\n  B --> C1[Web Search: Company News]\n  B --> C2[LinkedIn: Attendee Profiles]\n  B --> C3[SharePoint: Account History]\n  C1 & C2 & C3 --> D[Token-Bounded Merge]\n  D --> E[Draft Prep Email: Agenda + Talking Points]\n  E --> F([Exec or AE Inbox])"
+      "mermaidDiagram": "flowchart LR\n  A([Attendees + Meeting Context]) --> B[Coordinator]\n  B --> C1[Web Search: Company News]\n  B --> C2[LinkedIn: Attendee Profiles]\n  B --> C3[SharePoint: Account History]\n  C1 & C2 & C3 --> D[Token-Bounded Merge]\n  D --> E[Draft Prep Email: Agenda + Talking Points]\n  E --> F([Exec or AE Inbox])",
+      "taxonomyIds": [
+        "parallel-subagents",
+        "research-synthesize-generate"
+      ]
     },
     {
       "id": "scholarship-matching",
@@ -894,7 +953,11 @@
       ],
       "examScenarioPotential": "medium",
       "blogPotential": "high",
-      "mermaidDiagram": "flowchart TD\n  A([Student Profile Submitted]) --> B{Hard Eligibility Filter}\n  B -->|Eligible| C[Semantic Fit Scoring]\n  B -->|Ineligible| X([Excluded])\n  C --> D[Score by Fit + Deadline Proximity]\n  D --> E[Ranked Shortlist]\n  E --> F([Application Guidance per Match])"
+      "mermaidDiagram": "flowchart TD\n  A([Student Profile Submitted]) --> B{Hard Eligibility Filter}\n  B -->|Eligible| C[Semantic Fit Scoring]\n  B -->|Ineligible| X([Excluded])\n  C --> D[Score by Fit + Deadline Proximity]\n  D --> E[Ranked Shortlist]\n  E --> F([Application Guidance per Match])",
+      "taxonomyIds": [
+        "document-rag",
+        "research-synthesize-generate"
+      ]
     }
   ],
   "catalogUseCases": [
@@ -903,6 +966,10 @@
       "title": "Underwriting Assistant",
       "vertical": "insurance",
       "patterns": [
+        "document-rag",
+        "document-eval-structured-output"
+      ],
+      "taxonomyIds": [
         "document-rag",
         "document-eval-structured-output"
       ]
@@ -914,6 +981,10 @@
       "patterns": [
         "trigger-extract-validate-route",
         "hitl-approval-gate"
+      ],
+      "taxonomyIds": [
+        "trigger-extract-validate-route",
+        "hitl-approval-gate"
       ]
     },
     {
@@ -922,6 +993,9 @@
       "vertical": "insurance",
       "patterns": [
         "document-eval-structured-output"
+      ],
+      "taxonomyIds": [
+        "document-eval-structured-output"
       ]
     },
     {
@@ -929,6 +1003,9 @@
       "title": "Claims Filing & Regulatory Submission",
       "vertical": "insurance",
       "patterns": [
+        "trigger-extract-validate-route"
+      ],
+      "taxonomyIds": [
         "trigger-extract-validate-route"
       ]
     },
@@ -939,6 +1016,10 @@
       "patterns": [
         "document-eval-structured-output",
         "document-rag"
+      ],
+      "taxonomyIds": [
+        "document-eval-structured-output",
+        "document-rag"
       ]
     },
     {
@@ -946,6 +1027,9 @@
       "title": "Billing and Payment Reconciliation",
       "vertical": "insurance",
       "patterns": [
+        "trigger-extract-validate-route"
+      ],
+      "taxonomyIds": [
         "trigger-extract-validate-route"
       ]
     },
@@ -955,6 +1039,9 @@
       "vertical": "insurance",
       "patterns": [
         "research-synthesize-generate"
+      ],
+      "taxonomyIds": [
+        "research-synthesize-generate"
       ]
     },
     {
@@ -962,6 +1049,10 @@
       "title": "Permitting Agent",
       "vertical": "government",
       "patterns": [
+        "trigger-extract-validate-route",
+        "hitl-approval-gate"
+      ],
+      "taxonomyIds": [
         "trigger-extract-validate-route",
         "hitl-approval-gate"
       ]
@@ -973,6 +1064,10 @@
       "patterns": [
         "document-rag",
         "trigger-extract-validate-route"
+      ],
+      "taxonomyIds": [
+        "document-rag",
+        "trigger-extract-validate-route"
       ]
     },
     {
@@ -981,6 +1076,9 @@
       "vertical": "government",
       "patterns": [
         "trigger-extract-validate-route"
+      ],
+      "taxonomyIds": [
+        "trigger-extract-validate-route"
       ]
     },
     {
@@ -988,6 +1086,9 @@
       "title": "Employee Training & Onboarding Agent",
       "vertical": "government",
       "patterns": [
+        "document-rag"
+      ],
+      "taxonomyIds": [
         "document-rag"
       ]
     },
@@ -998,6 +1099,10 @@
       "patterns": [
         "document-rag",
         "research-synthesize-generate"
+      ],
+      "taxonomyIds": [
+        "document-rag",
+        "research-synthesize-generate"
       ]
     },
     {
@@ -1005,6 +1110,9 @@
       "title": "Language Access Agent",
       "vertical": "government",
       "patterns": [
+        "research-synthesize-generate"
+      ],
+      "taxonomyIds": [
         "research-synthesize-generate"
       ]
     },
@@ -1015,6 +1123,10 @@
       "patterns": [
         "document-rag",
         "research-synthesize-generate"
+      ],
+      "taxonomyIds": [
+        "document-rag",
+        "research-synthesize-generate"
       ]
     },
     {
@@ -1022,6 +1134,9 @@
       "title": "Curriculum Routine Check Agent",
       "vertical": "education",
       "patterns": [
+        "document-eval-structured-output"
+      ],
+      "taxonomyIds": [
         "document-eval-structured-output"
       ]
     },
@@ -1031,6 +1146,9 @@
       "vertical": "education",
       "patterns": [
         "document-rag"
+      ],
+      "taxonomyIds": [
+        "document-rag"
       ]
     },
     {
@@ -1038,6 +1156,10 @@
       "title": "Loan Processing Agent",
       "vertical": "private-lending",
       "patterns": [
+        "trigger-extract-validate-route",
+        "hitl-approval-gate"
+      ],
+      "taxonomyIds": [
         "trigger-extract-validate-route",
         "hitl-approval-gate"
       ]
@@ -1049,6 +1171,10 @@
       "patterns": [
         "document-rag",
         "research-synthesize-generate"
+      ],
+      "taxonomyIds": [
+        "document-rag",
+        "research-synthesize-generate"
       ]
     },
     {
@@ -1056,6 +1182,9 @@
       "title": "Borrower Q&A Agent",
       "vertical": "private-lending",
       "patterns": [
+        "document-rag"
+      ],
+      "taxonomyIds": [
         "document-rag"
       ]
     },
@@ -1066,6 +1195,10 @@
       "patterns": [
         "document-eval-structured-output",
         "trigger-extract-validate-route"
+      ],
+      "taxonomyIds": [
+        "document-eval-structured-output",
+        "trigger-extract-validate-route"
       ]
     },
     {
@@ -1073,6 +1206,9 @@
       "title": "Fraud Case Narrative Agent",
       "vertical": "banking",
       "patterns": [
+        "research-synthesize-generate"
+      ],
+      "taxonomyIds": [
         "research-synthesize-generate"
       ]
     },
@@ -1083,6 +1219,10 @@
       "patterns": [
         "document-rag",
         "document-eval-structured-output"
+      ],
+      "taxonomyIds": [
+        "document-rag",
+        "document-eval-structured-output"
       ]
     },
     {
@@ -1090,6 +1230,9 @@
       "title": "Equipment Maintenance Q&A Agent",
       "vertical": "industrials",
       "patterns": [
+        "document-rag"
+      ],
+      "taxonomyIds": [
         "document-rag"
       ]
     },
@@ -1099,6 +1242,9 @@
       "vertical": "gtm",
       "patterns": [
         "research-synthesize-generate"
+      ],
+      "taxonomyIds": [
+        "research-synthesize-generate"
       ]
     },
     {
@@ -1106,6 +1252,9 @@
       "title": "Support Ticket Triage Agent",
       "vertical": "operations",
       "patterns": [
+        "trigger-extract-validate-route"
+      ],
+      "taxonomyIds": [
         "trigger-extract-validate-route"
       ]
     },
@@ -1116,6 +1265,10 @@
       "patterns": [
         "trigger-extract-validate-route",
         "hitl-approval-gate"
+      ],
+      "taxonomyIds": [
+        "trigger-extract-validate-route",
+        "hitl-approval-gate"
       ]
     },
     {
@@ -1123,6 +1276,9 @@
       "title": "Lease Abstraction Agent",
       "vertical": "real-estate",
       "patterns": [
+        "document-eval-structured-output"
+      ],
+      "taxonomyIds": [
         "document-eval-structured-output"
       ]
     },
@@ -1133,6 +1289,10 @@
       "patterns": [
         "research-synthesize-generate",
         "document-rag"
+      ],
+      "taxonomyIds": [
+        "research-synthesize-generate",
+        "document-rag"
       ]
     },
     {
@@ -1140,6 +1300,9 @@
       "title": "Contract Review Agent",
       "vertical": "legal",
       "patterns": [
+        "document-eval-structured-output"
+      ],
+      "taxonomyIds": [
         "document-eval-structured-output"
       ]
     },
@@ -1149,6 +1312,9 @@
       "vertical": "legal",
       "patterns": [
         "trigger-extract-validate-route"
+      ],
+      "taxonomyIds": [
+        "trigger-extract-validate-route"
       ]
     },
     {
@@ -1156,6 +1322,10 @@
       "title": "Litigation Research Agent",
       "vertical": "legal",
       "patterns": [
+        "document-rag",
+        "research-synthesize-generate"
+      ],
+      "taxonomyIds": [
         "document-rag",
         "research-synthesize-generate"
       ]

@@ -133,5 +133,9 @@
       "type": "Write",
       "note": "Delivers memo to policy team for review"
     }
+  ],
+  "taxonomyIds": [
+    "research-synthesize-generate",
+    "document-rag"
   ]
 }

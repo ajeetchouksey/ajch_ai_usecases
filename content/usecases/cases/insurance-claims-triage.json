@@ -185,5 +185,11 @@
       "type": "Write",
       "note": "Immutable log of every routing decision, evidence snapshot, and authorization — required for regulatory claims-handling compliance"
     }
+  ],
+  "taxonomyIds": [
+    "trigger-extract-validate-route",
+    "document-eval-structured-output",
+    "document-rag",
+    "hitl-approval-gate"
   ]
 }

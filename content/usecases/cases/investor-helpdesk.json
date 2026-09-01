@@ -147,5 +147,9 @@
       "type": "Write",
       "note": "All queries and retrieved chunks logged for compliance"
     }
+  ],
+  "taxonomyIds": [
+    "parallel-subagents",
+    "document-rag"
   ]
 }

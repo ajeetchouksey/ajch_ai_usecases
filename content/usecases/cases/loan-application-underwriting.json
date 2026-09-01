@@ -173,5 +173,10 @@
       "type": "Write",
       "note": "Immutable log of every decision, evidence snapshot, and threshold applied — required for ECOA / FCRA compliance"
     }
+  ],
+  "taxonomyIds": [
+    "document-rag",
+    "hitl-approval-gate",
+    "trigger-extract-validate-route"
   ]
 }

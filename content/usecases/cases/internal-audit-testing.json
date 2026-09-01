@@ -149,5 +149,9 @@
       "type": "Write",
       "note": "Stores workpaper packages in audit folder structure"
     }
+  ],
+  "taxonomyIds": [
+    "document-eval-structured-output",
+    "hitl-approval-gate"
   ]
 }

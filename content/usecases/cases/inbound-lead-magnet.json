@@ -136,5 +136,9 @@
       "type": "Write",
       "note": "Notifies sales rep for high-score leads"
     }
+  ],
+  "taxonomyIds": [
+    "trigger-extract-validate-route",
+    "research-synthesize-generate"
   ]
 }

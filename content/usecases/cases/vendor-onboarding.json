@@ -143,5 +143,9 @@
       "type": "HITL",
       "note": "Medium-risk vendors routed for human approval"
     }
+  ],
+  "taxonomyIds": [
+    "trigger-extract-validate-route",
+    "hitl-approval-gate"
   ]
 }

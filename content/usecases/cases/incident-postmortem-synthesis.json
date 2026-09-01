@@ -189,5 +189,11 @@
       "type": "Write",
       "note": "Corrective action items created only after approval — never agent-initiated"
     }
+  ],
+  "taxonomyIds": [
+    "parallel-subagents",
+    "research-synthesize-generate",
+    "document-eval-structured-output",
+    "hitl-approval-gate"
   ]
 }

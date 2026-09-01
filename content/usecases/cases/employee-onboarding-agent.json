@@ -175,5 +175,10 @@
       "label": "Anti-Money Laundering Agent",
       "vertical": "Banking"
     }
+  ],
+  "taxonomyIds": [
+    "parallel-subagents",
+    "hitl-approval-gate",
+    "trigger-extract-validate-route"
   ]
 }

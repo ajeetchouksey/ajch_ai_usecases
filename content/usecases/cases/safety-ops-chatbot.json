@@ -128,5 +128,8 @@
       "type": "Write",
       "note": "Logs inspections and corrective actions"
     }
+  ],
+  "taxonomyIds": [
+    "document-rag"
   ]
 }
