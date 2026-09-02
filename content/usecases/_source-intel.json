@@ -1082,17 +1082,6 @@
       ]
     },
     {
-      "id": "employee-onboarding-agent",
-      "title": "Employee Training & Onboarding Agent",
-      "vertical": "government",
-      "patterns": [
-        "document-rag"
-      ],
-      "taxonomyIds": [
-        "document-rag"
-      ]
-    },
-    {
       "id": "budgeting-agent",
       "title": "Budgeting Agent",
       "vertical": "government",
