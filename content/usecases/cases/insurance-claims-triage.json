@@ -190,6 +190,7 @@
     "trigger-extract-validate-route",
     "document-eval-structured-output",
     "document-rag",
-    "hitl-approval-gate"
+    "hitl-approval-gate",
+    "azure-ai-foundry"
   ]
 }
