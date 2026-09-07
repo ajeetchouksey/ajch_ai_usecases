@@ -177,6 +177,7 @@
   "taxonomyIds": [
     "document-rag",
     "hitl-approval-gate",
-    "trigger-extract-validate-route"
+    "trigger-extract-validate-route",
+    "azure-ai-foundry"
   ]
 }
