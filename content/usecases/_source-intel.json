@@ -1318,6 +1318,76 @@
         "document-rag",
         "research-synthesize-generate"
       ]
+    },
+    {
+      "id": "contract-redline-playbook-agent",
+      "title": "Contract Redline & Playbook Compliance Agent",
+      "vertical": "legal",
+      "patterns": [
+        "trigger-extract-validate-route",
+        "document-rag",
+        "document-eval-structured-output",
+        "hitl-approval-gate"
+      ],
+      "taxonomyIds": [
+        "trigger-extract-validate-route",
+        "document-rag",
+        "document-eval-structured-output",
+        "hitl-approval-gate",
+        "azure-ai-foundry"
+      ]
+    },
+    {
+      "id": "incident-postmortem-synthesis",
+      "title": "Incident Postmortem Synthesis Agent",
+      "vertical": "technology",
+      "patterns": [
+        "parallel-subagents",
+        "research-synthesize-generate",
+        "document-eval-structured-output",
+        "hitl-approval-gate"
+      ],
+      "taxonomyIds": [
+        "parallel-subagents",
+        "research-synthesize-generate",
+        "document-eval-structured-output",
+        "hitl-approval-gate",
+        "azure-ai-foundry"
+      ]
+    },
+    {
+      "id": "insurance-claims-triage",
+      "title": "FNOL Claims Intake Triage & Adjudication Support Agent",
+      "vertical": "insurance",
+      "patterns": [
+        "trigger-extract-validate-route",
+        "document-eval-structured-output",
+        "document-rag",
+        "hitl-approval-gate"
+      ],
+      "taxonomyIds": [
+        "trigger-extract-validate-route",
+        "document-eval-structured-output",
+        "document-rag",
+        "hitl-approval-gate",
+        "azure-ai-foundry"
+      ]
+    },
+    {
+      "id": "loan-application-underwriting",
+      "title": "Loan Application Underwriting Agent",
+      "vertical": "banking",
+      "patterns": [
+        "document-rag",
+        "hitl-approval-gate",
+        "trigger-extract-validate-route"
+      ],
+      "taxonomyIds": [
+        "document-rag",
+        "hitl-approval-gate",
+        "trigger-extract-validate-route",
+        "azure-ai-foundry"
+      ]
     }
   ]
 }
