@@ -474,7 +474,8 @@
       "mermaidDiagram": "flowchart LR\n  A([Investor Query]) --> B[Coordinator LLM]\n  B --> C1[CRM-LLM: Account History]\n  B --> C2[Product-LLM: Investment Docs]\n  C1 & C2 --> D[Typed Merge]\n  D --> E[Formatter-LLM: Compliance Language]\n  E --> F([Compliant Personalized Response])",
       "taxonomyIds": [
         "parallel-subagents",
-        "document-rag"
+        "document-rag",
+        "knowledge-base"
       ]
     },
     {
@@ -566,7 +567,8 @@
       "blogPotential": "high",
       "mermaidDiagram": "flowchart LR\n  A([User Question]) --> B[Embed Query]\n  B --> C[RBAC Pre-Filter by Policy Type]\n  C --> D[Vector Search Top-K]\n  D --> E{Freshness Gate}\n  E -->|Current| F[LLM Answer with Citations]\n  E -->|Stale| G[Staleness Disclaimer + LLM Answer]\n  F & G --> H([Grounded Answer])",
       "taxonomyIds": [
-        "document-rag"
+        "document-rag",
+        "knowledge-base"
       ]
     },
     {
@@ -698,7 +700,8 @@
       "mermaidDiagram": "flowchart TD\n  A([Meeting Recording + Transcript]) --> B[Transcription Agent]\n  B --> C[Summary Agent: Agenda + Decisions + Quotes]\n  C --> D[Index with Meeting Metadata]\n  D --> E([Natural Language Q&A Across Full Meeting History])",
       "taxonomyIds": [
         "document-rag",
-        "research-synthesize-generate"
+        "research-synthesize-generate",
+        "knowledge-base"
       ]
     },
     {
@@ -872,7 +875,8 @@
       "blogPotential": "high",
       "mermaidDiagram": "flowchart LR\n  A([Safety Question]) --> B[Parallel Search]\n  B --> C1[OSHA Standards - Regulatory Authority]\n  B --> C2[Company Safety Policies - Internal Guidance]\n  B --> C3[Incident Records - Historical Data]\n  C1 & C2 & C3 --> D[Synthesize with Source Hierarchy]\n  D --> E([Compliant Answer with Citations])",
       "taxonomyIds": [
-        "document-rag"
+        "document-rag",
+        "knowledge-base"
       ]
     },
     {
@@ -956,7 +960,8 @@
       "mermaidDiagram": "flowchart TD\n  A([Student Profile Submitted]) --> B{Hard Eligibility Filter}\n  B -->|Eligible| C[Semantic Fit Scoring]\n  B -->|Ineligible| X([Excluded])\n  C --> D[Score by Fit + Deadline Proximity]\n  D --> E[Ranked Shortlist]\n  E --> F([Application Guidance per Match])",
       "taxonomyIds": [
         "document-rag",
-        "research-synthesize-generate"
+        "research-synthesize-generate",
+        "knowledge-base"
       ]
     }
   ],
@@ -1333,8 +1338,7 @@
         "trigger-extract-validate-route",
         "document-rag",
         "document-eval-structured-output",
-        "hitl-approval-gate",
-        "azure-ai-foundry"
+        "hitl-approval-gate"
       ]
     },
     {
@@ -1351,8 +1355,7 @@
         "parallel-subagents",
         "research-synthesize-generate",
         "document-eval-structured-output",
-        "hitl-approval-gate",
-        "azure-ai-foundry"
+        "hitl-approval-gate"
       ]
     },
     {
@@ -1369,8 +1372,7 @@
         "trigger-extract-validate-route",
         "document-eval-structured-output",
         "document-rag",
-        "hitl-approval-gate",
-        "azure-ai-foundry"
+        "hitl-approval-gate"
       ]
     },
     {
@@ -1385,8 +1387,7 @@
       "taxonomyIds": [
         "document-rag",
         "hitl-approval-gate",
-        "trigger-extract-validate-route",
-        "azure-ai-foundry"
+        "trigger-extract-validate-route"
       ]
     }
   ]
