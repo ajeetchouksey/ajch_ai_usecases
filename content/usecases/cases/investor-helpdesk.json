@@ -150,6 +150,7 @@
   ],
   "taxonomyIds": [
     "parallel-subagents",
-    "document-rag"
+    "document-rag",
+    "knowledge-base"
   ]
 }

@@ -141,6 +141,7 @@
     }
   ],
   "taxonomyIds": [
-    "document-rag"
+    "document-rag",
+    "knowledge-base"
   ]
 }

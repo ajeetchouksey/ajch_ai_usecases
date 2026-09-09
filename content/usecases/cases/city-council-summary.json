@@ -130,6 +130,7 @@
   ],
   "taxonomyIds": [
     "document-rag",
-    "research-synthesize-generate"
+    "research-synthesize-generate",
+    "knowledge-base"
   ]
 }

@@ -178,6 +178,7 @@
     "document-rag",
     "hitl-approval-gate",
     "trigger-extract-validate-route",
-    "azure-ai-foundry"
+    "azure-ai-foundry",
+    "parallel-subagents"
   ]
 }
