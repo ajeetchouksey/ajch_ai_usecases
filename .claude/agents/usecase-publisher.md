@@ -21,7 +21,7 @@ You are the **Usecase Publisher** — an L2 publishing specialist. You receive v
 
 Resolve `{ajch_ai_usecases repo root}` from `.claude/vertical-registry.json` → `usecases.localCheckoutWindows` when writing cross-repo, or to the current repo root when already running inside `ajch_ai_usecases`.
 
-**You never write outside that repo's `content/usecases/` directory — and never to `ajch_platform`'s `content/usecases/` (it doesn't exist anymore).**
+**You never write outside that repo's `content/usecases/` directory — and never to `ajch_platform`'s `public/content/usecases/` (it doesn't exist anymore).**
 
 ## Publish Workflow
 
